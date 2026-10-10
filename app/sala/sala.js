@@ -34,6 +34,26 @@ export default function (componente) {
   for (const outra of pai.querySelectorAll(':scope > .sala')) if (outra !== sala.raiz) outra.remove();
   if (sala.raiz.parentNode !== pai) pai.appendChild(sala.raiz);
   sala.atualizar(dados);
+  segurarAltura(sala, pai);
+}
+
+// Cada redesenho do Streamlit troca o elemento do componente, e por um quadro a sala some:
+// a página encolhe e o navegador puxa a rolagem para cima. O contêiner em volta
+// (st.container(key="sala-dos-agentes") no app.py) sobrevive à troca; guardar nele a altura
+// da sala impede a página de encolher.
+const BLOCO_DA_SALA = '.st-key-sala-dos-agentes';
+
+function segurarAltura(sala, pai) {
+  const raizDoPai = pai.getRootNode(); // com isolate_styles, a sala fica dentro de um shadow root
+  sala.bloco = (raizDoPai.host || pai).closest(BLOCO_DA_SALA);
+  if (sala.observador) return;
+  sala.observador = new ResizeObserver(() => {
+    const altura = sala.raiz.offsetHeight; // 0 enquanto a sala está fora da página
+    if (!altura || !sala.bloco) return;
+    const margem = parseFloat(getComputedStyle(sala.raiz).marginBottom) || 0;
+    sala.bloco.style.minHeight = `${altura + margem}px`;
+  });
+  sala.observador.observe(sala.raiz);
 }
 
 // ---------------------------------------------------------------- desenho
