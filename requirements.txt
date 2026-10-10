@@ -7,6 +7,7 @@ trafilatura
 chromadb==1.5.9
 transformers
 torch
+torchvision
 sentence-transformers
 langchain-openai
 spacy>=3.8.0

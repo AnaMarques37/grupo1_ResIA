@@ -510,7 +510,8 @@ def render_analisar():
         # Fluxo Real com LangGraph
         estado_inicial = initial_state(text_input)
         progresso = Progresso(uuid.uuid4().hex)
-        lugar_da_sala = st.empty()
+        # O contêiner com key não é recriado a cada redesenho da sala: o sala.js guarda nele a altura dela
+        lugar_da_sala = st.container(key="sala-dos-agentes").empty()
         desenhar_sala(lugar_da_sala, progresso)
 
         def ao_terminar_no(no, segundos, avisos):
