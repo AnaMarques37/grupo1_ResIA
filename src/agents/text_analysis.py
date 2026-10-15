@@ -104,12 +104,18 @@ def montar_mensagens(
 
 
 def chamar_modelo(mensagens: list[tuple[str, str]]) -> str:
-    """Única função que fala com o LM Studio. Os testes a substituem por um modelo falso."""
+    """Única função que fala com o LM Studio / Groq. Os testes a substituem por um modelo falso."""
     formato = {
         "type": "json_schema",
         "json_schema": {"name": "text_report", "strict": True, "schema": TextReport.model_json_schema()},
     }
-    return llm_texto.bind(response_format=formato).invoke(mensagens).content
+    try:
+        return llm_texto.bind(response_format=formato).invoke(mensagens).content
+    except Exception:
+        try:
+            return llm_texto.bind(response_format={"type": "json_object"}).invoke(mensagens).content
+        except Exception:
+            return llm_texto.invoke(mensagens).content
 
 
 def remover_cercas(bruto: str) -> str:

@@ -486,9 +486,16 @@ def render_analisar():
 </div>
     """)
     
-    render_html("""
+    from src.services.llm import obter_credenciais
+    base_url, _, model_name, _ = obter_credenciais()
+    provedor_badge = "☁️ Groq Cloud (" + model_name + ")" if "groq.com" in base_url else "💻 LM Studio Local"
+
+    render_html(f"""
 <div style="background-color: #FFFFFF; border: 1px solid #EAEAEA; border-radius: 12px; padding: 2.5rem; margin-bottom: 3rem; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
-<strong style="font-size:1.1rem; color:#111;">Notícia para análise</strong><br>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+<strong style="font-size:1.1rem; color:#111;">Notícia para análise</strong>
+<span style="font-size:0.75rem; color:#666; background:#F5F5F5; border:1px solid #EAEAEA; padding:3px 8px; border-radius:12px;">{provedor_badge}</span>
+</div>
 <span style="font-size:0.95rem; color:#666; margin-bottom: 1.5rem; display:inline-block;">Cole o texto completo ou a URL de uma notícia que você quer investigar.</span>
     """)
     
@@ -528,7 +535,12 @@ def render_analisar():
                 desenhar_sala(lugar_da_sala, progresso)
                 status.update(label="Erro na execução", state="error")
                 st.error(f"Erro ao executar o pipeline: {str(e)}")
-                st.info("Dica: verifique se o LM Studio está rodando em localhost:1234 com o qwen2.5-7b carregado.")
+                from src.services.llm import obter_credenciais
+                base_url, _, model_name, _ = obter_credenciais()
+                if "groq.com" in base_url:
+                    st.info(f"Conexão ativa: Groq Cloud ({model_name}). Verifique se a sua GROQ_API_KEY está válida nos Secrets do Streamlit.")
+                else:
+                    st.info(f"Conexão ativa: Servidor Local ({base_url}). Se estiver no Streamlit Cloud, adicione GROQ_API_KEY nos Secrets do aplicativo.")
                 st.stop()
         
         validated = execucao.estado
