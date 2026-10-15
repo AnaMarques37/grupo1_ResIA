@@ -486,9 +486,12 @@ def render_analisar():
 </div>
     """)
     
-    from src.services.llm import obter_credenciais
-    base_url, _, model_name, _ = obter_credenciais()
-    provedor_badge = "☁️ Groq Cloud (" + model_name + ")" if "groq.com" in base_url else "💻 LM Studio Local"
+    try:
+        from src.services.llm import obter_credenciais
+        base_url, _, model_name, _ = obter_credenciais()
+        provedor_badge = "☁️ Groq Cloud (" + model_name + ")" if "groq.com" in base_url else "💻 LM Studio Local"
+    except Exception:
+        provedor_badge = "Conexão Ativa"
 
     render_html(f"""
 <div style="background-color: #FFFFFF; border: 1px solid #EAEAEA; border-radius: 12px; padding: 2.5rem; margin-bottom: 3rem; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
@@ -535,12 +538,15 @@ def render_analisar():
                 desenhar_sala(lugar_da_sala, progresso)
                 status.update(label="Erro na execução", state="error")
                 st.error(f"Erro ao executar o pipeline: {str(e)}")
-                from src.services.llm import obter_credenciais
-                base_url, _, model_name, _ = obter_credenciais()
-                if "groq.com" in base_url:
-                    st.info(f"Conexão ativa: Groq Cloud ({model_name}). Verifique se a sua GROQ_API_KEY está válida nos Secrets do Streamlit.")
-                else:
-                    st.info(f"Conexão ativa: Servidor Local ({base_url}). Se estiver no Streamlit Cloud, adicione GROQ_API_KEY nos Secrets do aplicativo.")
+                try:
+                    from src.services.llm import obter_credenciais
+                    base_url, _, model_name, _ = obter_credenciais()
+                    if "groq.com" in base_url:
+                        st.info(f"Conexão ativa: Groq Cloud ({model_name}). Verifique se a sua GROQ_API_KEY está válida nos Secrets do Streamlit.")
+                    else:
+                        st.info(f"Conexão ativa: Servidor Local ({base_url}). Se estiver no Streamlit Cloud, adicione GROQ_API_KEY nos Secrets do aplicativo.")
+                except Exception:
+                    pass
                 st.stop()
         
         validated = execucao.estado
